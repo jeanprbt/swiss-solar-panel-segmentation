@@ -32,6 +32,12 @@ The repository is structured as follows:
 
 ## Run instructions
 
-1. At first, data should be collected and put in the corresponding directories. There are two ways to do this.
-    - Run the `preprocessing.ipynb` notebook in the `notebooks/` directory
-    - Directly download the data from this [kaggle dataset](https://www.kaggle.com/datasets/jeanperbet/ml-project-2-solar-panels/data?select=roof_images)
+1. Install the required dependencies.
+
+    ```sh
+    pip install -r requirements.txt
+    ```
+
+2. Data should be collected and put in the corresponding directories. There are two ways to do this.
+    - Run the `preprocessing.ipynb` notebook in the `notebooks/` directory (~500 data points)
+    - Directly download the data from this [kaggle dataset](https://www.kaggle.com/datasets/jeanperbet/ml-project-2-solar-panels/data?select=roof_images) (~750 data points)
