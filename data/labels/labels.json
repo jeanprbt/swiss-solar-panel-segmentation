@@ -107421,5 +107421,210 @@
         "user_email": "maxime.ducourau@epfl.ch"
       }
     ]
+  },
+  {
+    "label_hash": "079b09a1-9de1-4d7c-ba41-73343a3a6394",
+    "branch_name": "main",
+    "created_at": "2024-12-13 10:29:56",
+    "last_edited_at": "2024-12-13 10:30:01",
+    "dataset_hash": "b582c702-99c8-4657-868c-a2e0aca11db7",
+    "dataset_title": "ADDITIONAL_IMAGES",
+    "data_title": "swissimage-dop10_2023_2569.6-1192.1.jpg",
+    "data_hash": "39fbb546-7c40-431c-adf1-4b571359f3bc",
+    "data_type": "image",
+    "file_type": "image/jpeg",
+    "is_image_sequence": null,
+    "data_units": {
+      "39fbb546-7c40-431c-adf1-4b571359f3bc": {
+        "data_hash": "39fbb546-7c40-431c-adf1-4b571359f3bc",
+        "data_title": "swissimage-dop10_2023_2569.6-1192.1.jpg",
+        "data_type": "image/jpeg",
+        "data_sequence": 0,
+        "labels": {},
+        "width": 1000,
+        "height": 1000,
+        "data_link": "gs://cord-ai-platform.appspot.com/cord-images-prod/D8l7fPaDYnh6UxGTK51gVxd0smk2/9d5e36c3-c2bb-453b-8fe4-fc0e01018170"
+      }
+    },
+    "object_answers": {},
+    "classification_answers": {},
+    "object_actions": {},
+    "label_status": "LABELLED",
+    "is_valid": true,
+    "video_link": null,
+    "annotation_task_status": "COMPLETED",
+    "export_hash": "9c8678c6-0b5b-463e-8699-77ba0cf5326c",
+    "exported_at": "Fri, 13 Dec 2024 10:30:42 UTC",
+    "export_history": [
+      {
+        "export_hash": "9c8678c6-0b5b-463e-8699-77ba0cf5326c",
+        "exported_at": "Fri, 13 Dec 2024 10:30:42 UTC",
+        "user_email": "jean.perbet@epfl.ch"
+      }
+    ]
+  },
+  {
+    "label_hash": "22db3f69-66db-4374-9afc-d01c992dfbef",
+    "branch_name": "main",
+    "created_at": "2024-12-13 10:30:02",
+    "last_edited_at": "2024-12-13 10:30:10",
+    "dataset_hash": "b582c702-99c8-4657-868c-a2e0aca11db7",
+    "dataset_title": "ADDITIONAL_IMAGES",
+    "data_title": "swissimage-dop10_2021_2638.7-1266.5.jpg",
+    "data_hash": "659fc11d-f6b8-4699-9ec4-d5c14fdffe15",
+    "data_type": "image",
+    "file_type": "image/jpeg",
+    "is_image_sequence": null,
+    "data_units": {
+      "659fc11d-f6b8-4699-9ec4-d5c14fdffe15": {
+        "data_hash": "659fc11d-f6b8-4699-9ec4-d5c14fdffe15",
+        "data_title": "swissimage-dop10_2021_2638.7-1266.5.jpg",
+        "data_type": "image/jpeg",
+        "data_sequence": 0,
+        "labels": {},
+        "width": 1000,
+        "height": 1000,
+        "data_link": "gs://cord-ai-platform.appspot.com/cord-images-prod/D8l7fPaDYnh6UxGTK51gVxd0smk2/d4c5e008-fc2c-42e5-a093-c604ef99375c"
+      }
+    },
+    "object_answers": {},
+    "classification_answers": {},
+    "object_actions": {},
+    "label_status": "LABELLED",
+    "is_valid": true,
+    "video_link": null,
+    "annotation_task_status": "COMPLETED",
+    "export_hash": "73e23ee5-153a-4d61-8186-bfc3defaaa7e",
+    "exported_at": "Fri, 13 Dec 2024 10:30:42 UTC",
+    "export_history": [
+      {
+        "export_hash": "73e23ee5-153a-4d61-8186-bfc3defaaa7e",
+        "exported_at": "Fri, 13 Dec 2024 10:30:42 UTC",
+        "user_email": "jean.perbet@epfl.ch"
+      }
+    ]
+  },
+  {
+    "label_hash": "7b1ddf3c-4422-442a-8cf2-ef33bdcb5d89",
+    "branch_name": "main",
+    "created_at": "2024-12-13 10:29:43",
+    "last_edited_at": "2024-12-13 10:29:51",
+    "dataset_hash": "b582c702-99c8-4657-868c-a2e0aca11db7",
+    "dataset_title": "ADDITIONAL_IMAGES",
+    "data_title": "swissimage-dop10_2023_2569.5-1192.1.jpg",
+    "data_hash": "4761519d-3e90-4d71-b7db-aad98ff8d277",
+    "data_type": "image",
+    "file_type": "image/jpeg",
+    "is_image_sequence": null,
+    "data_units": {
+      "4761519d-3e90-4d71-b7db-aad98ff8d277": {
+        "data_hash": "4761519d-3e90-4d71-b7db-aad98ff8d277",
+        "data_title": "swissimage-dop10_2023_2569.5-1192.1.jpg",
+        "data_type": "image/jpeg",
+        "data_sequence": 0,
+        "labels": {},
+        "width": 1000,
+        "height": 1000,
+        "data_link": "gs://cord-ai-platform.appspot.com/cord-images-prod/D8l7fPaDYnh6UxGTK51gVxd0smk2/5c154da8-da7b-46df-a569-2b84786d7783"
+      }
+    },
+    "object_answers": {},
+    "classification_answers": {},
+    "object_actions": {},
+    "label_status": "LABELLED",
+    "is_valid": true,
+    "video_link": null,
+    "annotation_task_status": "COMPLETED",
+    "export_hash": "0070f179-ea98-4424-9095-ca149e1fab5d",
+    "exported_at": "Fri, 13 Dec 2024 10:30:42 UTC",
+    "export_history": [
+      {
+        "export_hash": "0070f179-ea98-4424-9095-ca149e1fab5d",
+        "exported_at": "Fri, 13 Dec 2024 10:30:42 UTC",
+        "user_email": "jean.perbet@epfl.ch"
+      }
+    ]
+  },
+  {
+    "label_hash": "d7382c33-3d82-49aa-a351-56a9f913fef9",
+    "branch_name": "main",
+    "created_at": "2024-12-13 10:29:52",
+    "last_edited_at": "2024-12-13 10:29:56",
+    "dataset_hash": "b582c702-99c8-4657-868c-a2e0aca11db7",
+    "dataset_title": "ADDITIONAL_IMAGES",
+    "data_title": "swissimage-dop10_2021_2617.9-1161.4.jpg",
+    "data_hash": "2b0d0c88-4887-4ab6-8553-1af55a006529",
+    "data_type": "image",
+    "file_type": "image/jpeg",
+    "is_image_sequence": null,
+    "data_units": {
+      "2b0d0c88-4887-4ab6-8553-1af55a006529": {
+        "data_hash": "2b0d0c88-4887-4ab6-8553-1af55a006529",
+        "data_title": "swissimage-dop10_2021_2617.9-1161.4.jpg",
+        "data_type": "image/jpeg",
+        "data_sequence": 0,
+        "labels": {},
+        "width": 1000,
+        "height": 1000,
+        "data_link": "gs://cord-ai-platform.appspot.com/cord-images-prod/D8l7fPaDYnh6UxGTK51gVxd0smk2/6496b810-167c-4da0-a26b-3c0e19319b87"
+      }
+    },
+    "object_answers": {},
+    "classification_answers": {},
+    "object_actions": {},
+    "label_status": "LABELLED",
+    "is_valid": true,
+    "video_link": null,
+    "annotation_task_status": "COMPLETED",
+    "export_hash": "32f9e2c5-fc34-4705-ab21-2d66b7607221",
+    "exported_at": "Fri, 13 Dec 2024 10:30:42 UTC",
+    "export_history": [
+      {
+        "export_hash": "32f9e2c5-fc34-4705-ab21-2d66b7607221",
+        "exported_at": "Fri, 13 Dec 2024 10:30:42 UTC",
+        "user_email": "jean.perbet@epfl.ch"
+      }
+    ]
+  },
+  {
+    "label_hash": "fcadac61-64b9-4264-90f8-47a1949cd1fc",
+    "branch_name": "main",
+    "created_at": "2024-12-13 10:30:10",
+    "last_edited_at": "2024-12-13 10:30:15",
+    "dataset_hash": "b582c702-99c8-4657-868c-a2e0aca11db7",
+    "dataset_title": "ADDITIONAL_IMAGES",
+    "data_title": "swissimage-dop10_2021_2645.6-1248.3.jpg",
+    "data_hash": "67a9da98-899f-4210-b79a-afdb41858e31",
+    "data_type": "image",
+    "file_type": "image/jpeg",
+    "is_image_sequence": null,
+    "data_units": {
+      "67a9da98-899f-4210-b79a-afdb41858e31": {
+        "data_hash": "67a9da98-899f-4210-b79a-afdb41858e31",
+        "data_title": "swissimage-dop10_2021_2645.6-1248.3.jpg",
+        "data_type": "image/jpeg",
+        "data_sequence": 0,
+        "labels": {},
+        "width": 1000,
+        "height": 1000,
+        "data_link": "gs://cord-ai-platform.appspot.com/cord-images-prod/D8l7fPaDYnh6UxGTK51gVxd0smk2/e1d4850b-21f9-4137-952a-35241f51f9b5"
+      }
+    },
+    "object_answers": {},
+    "classification_answers": {},
+    "object_actions": {},
+    "label_status": "LABELLED",
+    "is_valid": true,
+    "video_link": null,
+    "annotation_task_status": "COMPLETED",
+    "export_hash": "6eb92daa-d385-44da-a6d0-14ed61937241",
+    "exported_at": "Fri, 13 Dec 2024 10:30:42 UTC",
+    "export_history": [
+      {
+        "export_hash": "6eb92daa-d385-44da-a6d0-14ed61937241",
+        "exported_at": "Fri, 13 Dec 2024 10:30:42 UTC",
+        "user_email": "jean.perbet@epfl.ch"
+      }
+    ]
   }
 ]
