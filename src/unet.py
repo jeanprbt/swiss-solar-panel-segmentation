@@ -1,8 +1,8 @@
 from torch import nn
 
-class Unet(nn.Module):
+class UNet(nn.Module):
     def __init__(self):
-        super(Unet, self).__init__()
+        super(UNet, self).__init__()
         self.encoder = nn.Sequential(
             nn.Conv2d(3, 64, kernel_size=5, padding=2), nn.ReLU(), nn.MaxPool2d(2),
             nn.Conv2d(64, 128, kernel_size=5, padding=2), nn.ReLU(), nn.MaxPool2d(2),

@@ -19,8 +19,8 @@ class SegmentationDataset(Dataset):
         return len(self.image_names)
 
     def __getitem__(self, idx):
-        image_path = os.path.join(self.image_dir, self.image_names[idx] + ".jpg")
-        mask_path = os.path.join(self.mask_dir, self.image_names[idx] + ".png")
+        image_path = os.path.join(self.image_dir, self.image_names[idx])
+        mask_path = os.path.join(self.mask_dir, self.image_names[idx]).replace(".jpg", ".png")
 
         original_image = np.array(Image.open(image_path).convert("RGB")).astype(
             np.float32

@@ -107453,9 +107453,14 @@
     "is_valid": true,
     "video_link": null,
     "annotation_task_status": "COMPLETED",
-    "export_hash": "9c8678c6-0b5b-463e-8699-77ba0cf5326c",
-    "exported_at": "Fri, 13 Dec 2024 10:30:42 UTC",
+    "export_hash": "fcd31a5e-a927-4560-a25a-b71f9dfbf22b",
+    "exported_at": "Fri, 13 Dec 2024 13:42:33 UTC",
     "export_history": [
+      {
+        "export_hash": "fcd31a5e-a927-4560-a25a-b71f9dfbf22b",
+        "exported_at": "Fri, 13 Dec 2024 13:42:33 UTC",
+        "user_email": "jean.perbet@epfl.ch"
+      },
       {
         "export_hash": "9c8678c6-0b5b-463e-8699-77ba0cf5326c",
         "exported_at": "Fri, 13 Dec 2024 10:30:42 UTC",
@@ -107494,9 +107499,14 @@
     "is_valid": true,
     "video_link": null,
     "annotation_task_status": "COMPLETED",
-    "export_hash": "73e23ee5-153a-4d61-8186-bfc3defaaa7e",
-    "exported_at": "Fri, 13 Dec 2024 10:30:42 UTC",
+    "export_hash": "e389323a-43bb-49f9-8f72-2b5c231d3d8f",
+    "exported_at": "Fri, 13 Dec 2024 13:42:33 UTC",
     "export_history": [
+      {
+        "export_hash": "e389323a-43bb-49f9-8f72-2b5c231d3d8f",
+        "exported_at": "Fri, 13 Dec 2024 13:42:33 UTC",
+        "user_email": "jean.perbet@epfl.ch"
+      },
       {
         "export_hash": "73e23ee5-153a-4d61-8186-bfc3defaaa7e",
         "exported_at": "Fri, 13 Dec 2024 10:30:42 UTC",
@@ -107535,9 +107545,14 @@
     "is_valid": true,
     "video_link": null,
     "annotation_task_status": "COMPLETED",
-    "export_hash": "0070f179-ea98-4424-9095-ca149e1fab5d",
-    "exported_at": "Fri, 13 Dec 2024 10:30:42 UTC",
+    "export_hash": "37a0eb60-b441-415b-81a6-1f10ede9a3f4",
+    "exported_at": "Fri, 13 Dec 2024 13:42:33 UTC",
     "export_history": [
+      {
+        "export_hash": "37a0eb60-b441-415b-81a6-1f10ede9a3f4",
+        "exported_at": "Fri, 13 Dec 2024 13:42:33 UTC",
+        "user_email": "jean.perbet@epfl.ch"
+      },
       {
         "export_hash": "0070f179-ea98-4424-9095-ca149e1fab5d",
         "exported_at": "Fri, 13 Dec 2024 10:30:42 UTC",
@@ -107576,9 +107591,14 @@
     "is_valid": true,
     "video_link": null,
     "annotation_task_status": "COMPLETED",
-    "export_hash": "32f9e2c5-fc34-4705-ab21-2d66b7607221",
-    "exported_at": "Fri, 13 Dec 2024 10:30:42 UTC",
+    "export_hash": "35873be8-f244-4efe-ae6e-31940a66441c",
+    "exported_at": "Fri, 13 Dec 2024 13:42:33 UTC",
     "export_history": [
+      {
+        "export_hash": "35873be8-f244-4efe-ae6e-31940a66441c",
+        "exported_at": "Fri, 13 Dec 2024 13:42:33 UTC",
+        "user_email": "jean.perbet@epfl.ch"
+      },
       {
         "export_hash": "32f9e2c5-fc34-4705-ab21-2d66b7607221",
         "exported_at": "Fri, 13 Dec 2024 10:30:42 UTC",
@@ -107617,9 +107637,14 @@
     "is_valid": true,
     "video_link": null,
     "annotation_task_status": "COMPLETED",
-    "export_hash": "6eb92daa-d385-44da-a6d0-14ed61937241",
-    "exported_at": "Fri, 13 Dec 2024 10:30:42 UTC",
+    "export_hash": "928d5716-d156-4fd2-9073-9e92c1eb8bc5",
+    "exported_at": "Fri, 13 Dec 2024 13:42:33 UTC",
     "export_history": [
+      {
+        "export_hash": "928d5716-d156-4fd2-9073-9e92c1eb8bc5",
+        "exported_at": "Fri, 13 Dec 2024 13:42:33 UTC",
+        "user_email": "jean.perbet@epfl.ch"
+      },
       {
         "export_hash": "6eb92daa-d385-44da-a6d0-14ed61937241",
         "exported_at": "Fri, 13 Dec 2024 10:30:42 UTC",
