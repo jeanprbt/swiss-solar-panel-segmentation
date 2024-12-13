@@ -16,9 +16,11 @@ The repository is structured as follows:
 ├── data/                           
 │   ├── images/              # Images
 │   ├── labels/              # Ground truth labels
-│   │   └── labels.json             
-│   ├── roof_coordinates/    # Coordinates of the roofs
-│   ├── roof_images/         # Roof-only images
+│   │   └── labels.json  
+│   ├── roofs/                        
+│   │   ├── coordinates/     # Coordinates of all swiss roofs
+│   │   ├── images/          # Images w/ filtered out roofs
+│   │   └── masks/           # Binary masks of roofs corresponding to images
 │   ├── tiles/               # Original tiles
 │   └── urls/                # Swisstopo URLs
 │       └── urls.csv
