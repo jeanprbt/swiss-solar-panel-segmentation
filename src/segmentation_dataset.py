@@ -43,7 +43,7 @@ class SegmentationDataset(Dataset):
         original_image = torch.tensor(original_image).permute(2, 0, 1)
         original_mask = torch.tensor(original_mask).unsqueeze(0)
 
-        return original_image, original_mask, image_path, original_image, original_mask
+        return original_image, original_mask, self.image_names[idx], original_image, original_mask
         
 
 
