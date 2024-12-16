@@ -1,4 +1,5 @@
-from torch import nn
+import torch.nn as nn
+
 
 class UNet(nn.Module):
     def __init__(self, nb_layers: int, kernel_size: int):

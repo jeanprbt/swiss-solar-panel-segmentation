@@ -1,7 +1,11 @@
 import torch
-from torch import nn
+import torch.nn as nn
+import torch.nn.functional as F
+import torchvision.models as models
+
 from torch.utils.data import DataLoader
 from tqdm import tqdm
+
 
 def train_deeplab(
     model: nn.Module,
@@ -15,10 +19,10 @@ def train_deeplab(
     num_epochs: int,
 ) -> tuple[list[float], list[float]]:
     """
-    Train a model, compute IoU and loss, and perform validation with checkpoint saving.
+    Train DeepLab model, compute IoU and loss, and perform validation with checkpoint saving.
 
     Args:
-        model (torch.nn.Module): The model to be trained.
+        model (torch.nn.Module): DeepLab model to be trained.
         train_loader (DataLoader): DataLoader for the training set.
         val_loader (DataLoader): DataLoader for the validation set.
         device (torch.device): The device to run the training on.
@@ -27,42 +31,36 @@ def train_deeplab(
         optimizer (torch.optim.Optimizer): The optimizer for training.
         scaler (torch.cuda.amp.GradScaler): GradScaler for mixed-precision training.
         num_epochs (int): Number of epochs to train for.
+        
     Returns:
-        tuple: train_loss (list), train_iou (list)
+        list[float]: training losses
+        list[float]: training IoUs
     """
-
+    model.train()
     train_iou = []
     train_loss = []
-
     for epoch in range(num_epochs):
-        print(f"Epoch: {epoch + 1}/{num_epochs}")
-
+        
         iterations = 0
         iter_loss = 0.0
         iter_iou = 0.0
-
-        model.train()
+        
+        # Training loop
         batch_loop = tqdm(train_loader, desc=f"Training Epoch {epoch + 1}")
-
-        for image, mask, *_ in batch_loop:
-            
-            image, mask = image.permute(0, 2, 1, 3).to(device), mask.to(device)
-
-            with torch.amp.autocast("cuda"):
+        for image, mask, _ in batch_loop:
+            image, mask = image.to(device), mask.to(device)
+            with torch.amp.autocast(device_type=str(device)):
                 predictions = model(image)
-                loss = loss_fn(predictions, mask)
-                iou = iou_fn(predictions, mask)
-
-                iter_loss += loss.item()
-                iter_iou += iou.item()
-
+                loss = loss_fn(predictions, mask).item()
+                iou = iou_fn(predictions, mask).item()
+                iter_loss += loss
+                iter_iou += iou
             optimizer.zero_grad()
             scaler.scale(loss).backward()
             scaler.step(optimizer)
             scaler.update()
-
             iterations += 1
-            batch_loop.set_postfix(diceloss=loss.item(), iou=iou.item())
+            batch_loop.set_postfix(diceloss=loss, iou=iou)
 
         train_loss.append(iter_loss / iterations)
         train_iou.append(iter_iou / iterations)
@@ -76,11 +74,9 @@ def train_deeplab(
         model.eval()
 
         with torch.no_grad():
-            for *_, image, mask in tqdm(val_loader, desc=f"Validation Epoch {epoch+1}"):
-                print(image.shape, mask.shape)
+            for image, mask, _ in tqdm(val_loader, desc=f"Validation Epoch {epoch+1}"):
                 x, y = image.float().to(device), mask.float().to(device)
                 preds = torch.sigmoid(model(x))
-                print(preds.unique())
                 preds = (preds > 0.5).float()
                 num_correct += (preds == y).sum().item()
                 num_pixels += torch.numel(preds)

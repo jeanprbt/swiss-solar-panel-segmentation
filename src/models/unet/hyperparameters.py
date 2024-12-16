@@ -1,16 +1,15 @@
 import optuna
+optuna.logging.set_verbosity(optuna.logging.WARNING)
+
 import torch.nn as nn
 import torch.optim as optim
 import torch
 
-from torch.utils.data import DataLoader
-from sklearn.metrics import confusion_matrix
 from tqdm import tqdm
-from architectures.unet import UNet
-from model import evaluate
+from torch.utils.data import DataLoader
 
-
-optuna.logging.set_verbosity(optuna.logging.WARNING)
+from model_functions import evaluate
+from architecture import UNet
 
 
 # ------------------------------------- Segmentation Threshold -----------------------------------------
