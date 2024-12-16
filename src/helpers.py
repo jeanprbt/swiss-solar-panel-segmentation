@@ -104,6 +104,7 @@ def get_loaders(
     masks_dir: str,
     batch_size: int = 2,
     transform: Optional[A.Compose] = None,
+    seed: int = 42,
 ) -> DataLoader | DataLoader | DataLoader:
     """
     Create DataLoader objects for the training, validation, and test sets.
@@ -114,13 +115,16 @@ def get_loaders(
         masks_dir (str): Path to the directory containing the masks.
         batch_size (int): Batch size for the DataLoader objects.
         transform (Optional[A.Compose]): Transform to apply to the images and masks.
+        seed (int): Seed for the random number generator.
 
     Returns:
         tuple: (train_loader, val_loader, test_loader)
     """
+    generator = torch.Generator().manual_seed(seed)
     dataset = SegmentationDataset(images_dir, masks_dir, image_names, transform)
     train_dataset, val_dataset, test_dataset = torch.utils.data.random_split(
-        dataset, [0.8, 0.1, 0.1]
+        dataset, [0.8, 0.1, 0.1], 
+        generator=generator
     )
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
     val_loader = DataLoader(val_dataset, batch_size=batch_size)
@@ -158,8 +162,8 @@ def metrics(
 
     with torch.no_grad():
         for image, label, *_ in test_loader.dataset:
-            image = torch.tensor(image).float().to(device)
-            label = torch.tensor(label).float().to(device)
+            image = image.clone().detach().float().to(device)
+            label = label.clone().detach().float().to(device)
 
             predicted_output = model(image)
             predicted_mask = predicted_output.cpu().squeeze()
@@ -177,12 +181,9 @@ def metrics(
                 fn += conf[1, 0]
                 tp += conf[1, 1]
 
-    accuracy = (tp + tn) / (tp + tn + fp + fn)
-    iou = tp / (tp + fp + fn)
-    precision = tp / (tp + fp)
-    recall = tp / (tp + fn)
-    f1 = 2 * precision * recall / (precision + recall)
+    accuracy = (tp + tn) / (tp + tn + fp + fn) if tp + tn + fp + fn != 0 else 0
+    iou = tp / (tp + fp + fn) if tp + fp + fn != 0 else 0
+    precision = tp / (tp + fp) if tp + fp != 0 else 0
+    recall = tp / (tp + fn) if tp + fn != 0 else 0
+    f1 = 2 * precision * recall / (precision + recall) if precision + recall != 0 else 0
     return accuracy, f1, precision, recall, iou
-
-
-
