@@ -1,22 +1,21 @@
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
-import torchvision.models as models
+import torch.optim as optim
 
 from torch.utils.data import DataLoader
 from tqdm import tqdm
+
+from models.deeplab.utils import IoU
 
 
 def train_deeplab(
     model: nn.Module,
     train_loader: DataLoader,
     val_loader: DataLoader,
+    criterion: nn.Module,
+    lr: float,
+    epochs: int,
     device: torch.device,
-    loss_fn: nn.Module,
-    iou_fn,
-    optimizer: torch.optim.Optimizer,
-    scaler: torch.cuda.amp.GradScaler,
-    num_epochs: int,
 ) -> tuple[list[float], list[float]]:
     """
     Train DeepLab model, compute IoU and loss, and perform validation with checkpoint saving.
@@ -25,21 +24,25 @@ def train_deeplab(
         model (torch.nn.Module): DeepLab model to be trained.
         train_loader (DataLoader): DataLoader for the training set.
         val_loader (DataLoader): DataLoader for the validation set.
+        criterion (torch.nn.Module): Loss function to use.
+        lr (float): Learning rate for the optimizer.
         device (torch.device): The device to run the training on.
-        loss_fn (torch.nn.Module): The loss function.
-        iou_fn (function): Function to compute Intersection over Union (IoU).
-        optimizer (torch.optim.Optimizer): The optimizer for training.
-        scaler (torch.cuda.amp.GradScaler): GradScaler for mixed-precision training.
-        num_epochs (int): Number of epochs to train for.
+        pochs (int): Number of epochs to train for.
         
     Returns:
         list[float]: training losses
         list[float]: training IoUs
     """
-    model.train()
+    model = model.to(device)
+    optimizer = optim.Adam(model.parameters(), lr=lr)
+    
+    iou_fn = IoU()
+    scaler = torch.amp.GradScaler(str(device))
+    
     train_iou = []
     train_loss = []
-    for epoch in range(num_epochs):
+    for epoch in range(epochs):
+        model.train()
         
         iterations = 0
         iter_loss = 0.0
@@ -51,21 +54,21 @@ def train_deeplab(
             image, mask = image.to(device), mask.to(device)
             with torch.amp.autocast(device_type=str(device)):
                 predictions = model(image)
-                loss = loss_fn(predictions, mask).item()
-                iou = iou_fn(predictions, mask).item()
-                iter_loss += loss
-                iter_iou += iou
+                loss = criterion(predictions, mask)
+                iou = iou_fn(predictions, mask)
+                iter_loss += loss.item()
+                iter_iou += iou.item()
             optimizer.zero_grad()
             scaler.scale(loss).backward()
             scaler.step(optimizer)
             scaler.update()
             iterations += 1
-            batch_loop.set_postfix(diceloss=loss, iou=iou)
+            batch_loop.set_postfix(diceloss=loss.item(), iou=iou.item())
 
         train_loss.append(iter_loss / iterations)
         train_iou.append(iter_iou / iterations)
 
-        print(f"Epoch: {epoch + 1}/{num_epochs}, Training loss: {round(train_loss[-1], 3)}")
+        print(f"Epoch: {epoch + 1}/{epochs}, Training loss: {round(train_loss[-1], 3)}")
 
         # Validation loop
         num_correct = 0

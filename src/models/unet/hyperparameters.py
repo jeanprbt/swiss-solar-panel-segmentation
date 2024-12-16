@@ -9,7 +9,7 @@ from tqdm import tqdm
 from torch.utils.data import DataLoader
 
 from model_functions import evaluate
-from architecture import UNet
+from models.unet.architecture import UNet
 
 
 # ------------------------------------- Segmentation Threshold -----------------------------------------
@@ -50,7 +50,7 @@ def threshold_objective(
         float: Intersection over Union (IoU) score.
     """
     threshold = trial.suggest_float("threshold", 0.1, 0.9)
-    _, f1, _ = evaluate(model, test_loader, threshold, device)
+    _, f1, _ = evaluate(model=model, test_loader=test_loader, threshold=threshold, device=device)
     return f1
 
 
@@ -93,8 +93,7 @@ def unet_objective(
         float: Validation loss.
     """
     learning_rate = trial.suggest_float("lr", 1e-4, 1e-2, log=True)
-    # epochs = trial.suggest_int("epochs", 20, 40, step=5)
-    epochs = trial.suggest_int("epochs", 1, 2, step=1)
+    epochs = trial.suggest_int("epochs", 20, 40, step=5)
     
     nb_layers = trial.suggest_int("encoder_layers", 2, 3)
     kernel_size = trial.suggest_int("kernel_size", 3, 7, step=2)

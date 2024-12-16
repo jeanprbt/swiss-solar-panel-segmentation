@@ -18,6 +18,7 @@ def predict(
     post_process: bool = False,
     roof_masks_dir: str = "",
     device: torch.device = torch.device("cpu"),
+    deeplab: bool = False,
 ) -> Image.Image | np.ndarray | np.ndarray:
     """
     Evaluate a segmentation model on a single image and return the predicted mask.
@@ -30,6 +31,7 @@ def predict(
         post_process (bool): Whether to apply post-processing to the predicted mask.
         roof_masks_dir (str): Path of directory containing masks of roof areas (only used if post_process is True).
         device (torch.device): Device to perform computations on (e.g., "cuda" or "cpu").
+        deeplab (bool): Whether the model is a DeepLab model.
         
     Returns:
         PIL.Image.Image: Real image.
@@ -42,7 +44,9 @@ def predict(
         
         # Run predictions
         input_image, label_image = image.to(device), label.to(device)
-        predicted_output = (model(input_image).cpu().squeeze() > threshold).numpy().astype(np.uint8) * 255
+        predicted_output = (
+            model(input_image if not deeplab else input_image.unsqueeze(0)).cpu().squeeze() > threshold
+        ).numpy().astype(np.uint8) * 255
         
         # Retrieve real image and ground truth mask
         real_image = Image.fromarray((image.permute(1, 2, 0).numpy() * 255).astype(np.uint8))
@@ -66,6 +70,7 @@ def evaluate(
     post_process: bool = False,
     roof_masks_dir: str = "",
     device: torch.device = torch.device("cpu"),
+    deeplab: bool = False,
 ):
     """
     Evaluate a segmentation model on a test split and compute overall metrics.
@@ -77,6 +82,7 @@ def evaluate(
         post_process (bool): Whether to apply post-processing to the predicted masks.
         roof_masks_dir (str): Directory containing roof masks.
         device (torch.device): Device to perform computations on (e.g., "cuda" or "cpu").
+        deeplab (bool): Whether the model is a DeepLab model
 
     Returns:
         accuracy (float): Accuracy of the model.
@@ -84,6 +90,7 @@ def evaluate(
         iou (float): Intersection over Union of the model.
     """
     model.eval()
+    model = model.to(device)
     tn, fp, fn, tp = [0] * 4
     with torch.no_grad():
         for i in tqdm(range(len(test_loader.dataset)), desc="Evaluating on test set"):
@@ -94,7 +101,8 @@ def evaluate(
                 threshold=threshold,
                 post_process=post_process, 
                 roof_masks_dir=roof_masks_dir, 
-                device=device
+                device=device,
+                deeplab=deeplab,
             )  
             preds = preds.flatten()  
             ground_truth = ground_truth.flatten()

@@ -105,11 +105,12 @@ def plot_model_metrics(
         indices + bar_width / 2, f1_scores, bar_width, label="F1 Score", color="salmon"
     )
 
+    ax.set_ylim(bottom=0)
     ax.set_xlabel("Models", fontsize=12)
     ax.set_ylabel("Scores", fontsize=12)
     ax.set_title("Comparison of IOU and F1 Scores for Different Models", fontsize=14)
     ax.set_xticks(indices)
-    ax.set_xticklabels(models, fontsize=10)
+    ax.set_xticklabels(models, fontsize=10, fontweight="bold")
     ax.legend(fontsize=10)
     for bars in [bars1, bars2]:
         for bar in bars:
