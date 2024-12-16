@@ -6,19 +6,16 @@ import torch
 from torch.utils.data import DataLoader
 from sklearn.metrics import confusion_matrix
 from tqdm import tqdm
+from architectures.unet import UNet
+from model import evaluate
 
 
-DEVICE = (
-    torch.device("cuda")
-    if torch.cuda.is_available()
-    else torch.device("mps") if torch.mps.is_available() else torch.device("cpu")
-)
+optuna.logging.set_verbosity(optuna.logging.WARNING)
 
 
 # ------------------------------------- Segmentation Threshold -----------------------------------------
-
 def optimize_threshold(
-    model: nn.Module, test_loader: DataLoader, n_trials: int = 10
+    model: nn.Module, test_loader: DataLoader, n_trials: int = 10, device: torch.device = torch.device("cpu")
 ) -> float:
     """
     Optimize the threshold of a semantic segmentation model using Optuna.
@@ -31,15 +28,15 @@ def optimize_threshold(
     Returns:
         float: Best threshold found by Optuna.
     """
-    study = optuna.create_study(direction=["maximize", "maximize"])
-    study.optimize(lambda trial: threshold_objective(trial, model, test_loader))
-    fig = optuna.visualization.plot_optimization_history(study)
+    study = optuna.create_study(direction="maximize")
+    study.optimize(lambda trial: threshold_objective(trial, model, test_loader, device), n_trials=n_trials)
+    fig = optuna.visualization.plot_optimization_history(study, target_name="F1-Score")
     fig.show()
     return study.best_params["threshold"]
 
 
 def threshold_objective(
-    trial: optuna.trial.Trial, model: nn.Module, test_loader: DataLoader
+    trial: optuna.trial.Trial, model: nn.Module, test_loader: DataLoader, device: torch.device = torch.device("cpu")
 ) -> float | float:
     """
     Objective function for Optuna to optimize the threshold of a semantic segmentation model.
@@ -54,52 +51,35 @@ def threshold_objective(
         float: Intersection over Union (IoU) score.
     """
     threshold = trial.suggest_float("threshold", 0.1, 0.9)
-    model.eval()
-    tn, fp, fn, tp = [0] * 4
-    with torch.no_grad():
-        for image, mask in test_loader:
-            image, mask = image.to(DEVICE), mask.to(DEVICE)
-            outputs = model(image).cpu().squeeze()
-            preds = (outputs > threshold).int().numpy().flatten()
-            ground_truth = mask.cpu().squeeze().numpy().flatten()
-            conf = confusion_matrix(ground_truth, preds)
-            if len(conf[0]) == 2:
-                fp += conf[0,1]
-                fn += conf[1,0]
-                tp += conf[1,1]
-            tn += conf[0,0]
-    
-    iou = tp / (tp + fp + fn)
-    precision = tp / (tp + fp)
-    recall = tp / (tp + fn)
-    f1 = 2 * precision * recall / (precision + recall)
-    
-    return  f1, iou
+    _, f1, _ = evaluate(model, test_loader, threshold, device)
+    return f1
 
-# ----------------------------------------------- UNet -------------------------------------------------
 
+# --------------------------------------- UNet hyperparameters -----------------------------------------
 def optimize_unet_hyperparameters(
-    train_loader: DataLoader, val_loader: DataLoader, n_trials: int = 10
+    train_loader: DataLoader, val_loader: DataLoader, n_trials: int = 10, device: torch.device = torch.device("cpu")
 ) -> dict:
     """
     Optimize hyperparameters of a U-Net model using Optuna, namely learning rate, number of
     epochs, number of layers and kernel size.
-    
+
     Args:
         train_loader (torch.utils.data.dataloader.DataLoader): DataLoader for training data.
         val_loader (torch.utils.data.dataloader.DataLoader): DataLoader for validation data.
         n_trials (int): Number of trials to run.
-        
+
     Returns:
         dict: Best hyperparameters found by Optuna.
     """
     study = optuna.create_study(direction="minimize")
-    study.optimize(lambda trial: unet_objective(trial, train_loader, val_loader))
+    study.optimize(lambda trial: unet_objective(trial, train_loader, val_loader, device), n_trials=n_trials)
+    fig = optuna.visualization.plot_param_importances(study)
+    fig.show()
     return study.best_params
 
 
 def unet_objective(
-    trial: optuna.trial.Trial, train_loader: DataLoader, val_loader: DataLoader
+    trial: optuna.trial.Trial, train_loader: DataLoader, val_loader: DataLoader, device: torch.device = torch.device("cpu")
 ) -> float:
     """
     Objective function for Optuna to optimize hyperparameters of a U-Net model, i.e learning rate,
@@ -113,11 +93,16 @@ def unet_objective(
     Returns:
         float: Validation loss.
     """
-    # Define a U-Net model using Optuna's trial object
-    model = unet(trial).to(DEVICE)
-    criterion = nn.BCELoss()
     learning_rate = trial.suggest_float("lr", 1e-4, 1e-2, log=True)
-    epochs = trial.suggest_int("epochs", 20, 40, step=5)
+    # epochs = trial.suggest_int("epochs", 20, 40, step=5)
+    epochs = trial.suggest_int("epochs", 1, 2, step=1)
+    
+    nb_layers = trial.suggest_int("encoder_layers", 2, 3)
+    kernel_size = trial.suggest_int("kernel_size", 3, 7, step=2)
+    
+    # Define a custom U-Net model
+    model = UNet(nb_layers, kernel_size).to(device)
+    criterion = nn.BCELoss()
     optimizer = optim.Adam(model.parameters(), lr=learning_rate)
 
     # Early stopping params
@@ -125,13 +110,13 @@ def unet_objective(
     best_val_loss = float("inf")
     patience_cnt = 0
 
-    for _ in range(epochs):
+    for epoch in range(epochs):
         model.train()
         train_loss = 0
-        for images, masks in train_loader:
-            images, masks = images.to(DEVICE), masks.to(DEVICE)
-            outputs = model(images)
-            loss = criterion(outputs, masks)
+        for image, label, _ in tqdm(train_loader, desc=f"Training Epoch {epoch+1}"):
+            image, label = image.to(device), label.to(device)
+            outputs = model(image)
+            loss = criterion(outputs, label)
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
@@ -140,10 +125,10 @@ def unet_objective(
         model.eval()
         val_loss = 0
         with torch.no_grad():
-            for images, masks in val_loader:
-                images, masks = images.to(DEVICE), masks.to(DEVICE)
-                outputs = model(images)
-                loss = criterion(outputs, masks)
+            for image, label, _ in val_loader:
+                image, label = image.to(device), label.to(device)
+                outputs = model(image)
+                loss = criterion(outputs, label)
                 val_loss += loss.item()
 
         # Early stopping
@@ -158,39 +143,3 @@ def unet_objective(
             break
 
     return val_loss
-
-
-def unet(trial: optuna.trial.Trial) -> nn.Module:
-    """
-    Define a U-Net model with nb. of layers and kernel size optimized by Optuna.
-
-    Args:
-        trial (optuna.trial.Trial): Optuna's trial object.
-
-    Returns:
-        nn.Module: A U-Net model.
-    """
-    nb_layers = trial.suggest_int("encoder_layers", 2, 3)
-    kernel_size = trial.suggest_int("kernel_size", 3, 7, step=2)
-    encoder = []
-    for i in range(nb_layers):
-        in_channels, out_channels = 3 if i == 0 else 2 ** (5 + i), 2 ** (6 + i)
-        padding = kernel_size // 2
-        encoder.append(
-            nn.Conv2d(
-                in_channels, out_channels, kernel_size=kernel_size, padding=padding
-            )
-        )
-        encoder += [nn.ReLU(), nn.MaxPool2d(2)]
-
-    decoder = []
-    for i in range(nb_layers - 1):
-        in_channels, out_channels = 2 ** (5 + nb_layers - i), 2 ** (4 + nb_layers - i)
-        decoder.append(
-            nn.ConvTranspose2d(in_channels, out_channels, kernel_size=2, stride=2)
-        )
-        decoder.append(nn.ReLU())
-        decoder.append(nn.ConvTranspose2d(2**6, 1, kernel_size=2, stride=2))
-        decoder.append(nn.Sigmoid())
-
-    return nn.Sequential(*encoder, *decoder)

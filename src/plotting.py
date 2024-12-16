@@ -1,11 +1,7 @@
 import matplotlib.pyplot as plt
-import torch
-import torch.nn as nn
 import numpy as np
 
 from PIL import Image
-from torch.utils.data import DataLoader
-
 
 def plot_mask_on_image(
     image_path: str,
@@ -26,64 +22,41 @@ def plot_mask_on_image(
     """
     mask_2d = mask.reshape(image_size)
     image = Image.open(image_path).resize(image_size)
-
     plt.imshow(image, cmap="gray")
     plt.imshow(mask_2d, cmap="jet", alpha=alpha)
     plt.axis("off")
     plt.title(title)
 
 
-def visualize_results(
-    model: nn.Module,
-    test_loader: DataLoader,
-    device: torch.device,
-    idx: int,
-    threshold: float = 0.3,
+def plot_prediction(
+    real_image: Image,
+    ground_truth: np.ndarray,
+    predicted_mask: np.ndarray,
 ):
     """
-    Visualise the results of the model on the test dataset
+    Visualize the output of a segmentation model.
 
     Args:
         model (nn.Module): trained model
         test_loader (DataLoader): test data loader
-        device (torch.device): device to perform computations on
-        idx (int): index of the image to visualise
+        idx (int): index of the image to visualize
         threshold (float): threshold for binary predictions
+        post_process (bool): whether to apply post-processing to the predicted mask
+        roof_masks_dir (str): directory containing roof masks
+        device (torch.device): device to perform computations on
     """
-    model.eval()
-    test_images, test_masks, *_ = test_loader.dataset[idx]
-    sample_image = test_images.clone().detach().float().to(device)
-    sample_mask = test_masks.clone().detach().float().to(device)
-
-    with torch.no_grad():
-        predicted_output = model(sample_image)
-
-    input_image = sample_image.cpu().squeeze().permute(1, 2, 0) / 255
-    ground_truth_mask = sample_mask.cpu().squeeze() / 255
-
-    predicted_mask = predicted_output.cpu().squeeze() / 255
-    binary_predicted_mask = predicted_mask > 0.3
-
-    _, axes = plt.subplots(1, 4, figsize=(15, 5))
-    # Input image
-    axes[0].imshow(input_image)
+    _, axes = plt.subplots(1, 3, figsize=(15, 5))
+    axes[0].imshow(real_image)
     axes[0].set_title("Input Image")
     axes[0].axis("off")
 
-    # Ground truth mask
-    axes[1].imshow(ground_truth_mask, cmap="gray")
+    axes[1].imshow(ground_truth, cmap="gray")
     axes[1].set_title("Ground Truth Mask")
     axes[1].axis("off")
 
-    # Predicted mask
     axes[2].imshow(predicted_mask, cmap="gray")
-    axes[2].set_title("Predicted Mask")
+    axes[2].set_title("Predicted Segmentation")
     axes[2].axis("off")
-
-    # Thresholded predicted mask
-    axes[3].imshow(binary_predicted_mask, cmap="gray")
-    axes[3].set_title("Thresholded Predicted Mask")
-    axes[3].axis("off")
 
 
 def plot_losses(train_losses: list[float], val_losses: list[float]):
@@ -106,11 +79,11 @@ def plot_losses(train_losses: list[float], val_losses: list[float]):
     plt.show()
 
 
-def compare_model_metrics(
+def plot_model_metrics(
     models: list[str], iou_scores: list[float], f1_scores: list[float]
 ):
     """
-    Plots bar plots comparing IOU and F1 scores for multiple models.
+    Create bar plots comparing IOU and F1 scores for multiple models.
 
     Parameters:
     - models (list[str]): List of model names.
@@ -124,7 +97,7 @@ def compare_model_metrics(
 
     bar_width = 0.35
     indices = np.arange(len(models))
-    fig, ax = plt.subplots(figsize=(10, 6))
+    _, ax = plt.subplots(figsize=(10, 6))
     bars1 = ax.bar(
         indices - bar_width / 2, iou_scores, bar_width, label="IOU", color="skyblue"
     )
@@ -138,19 +111,16 @@ def compare_model_metrics(
     ax.set_xticks(indices)
     ax.set_xticklabels(models, fontsize=10)
     ax.legend(fontsize=10)
-
     for bars in [bars1, bars2]:
         for bar in bars:
             height = bar.get_height()
             ax.annotate(
                 f"{height:.2f}",
                 xy=(bar.get_x() + bar.get_width() / 2, height),
-                xytext=(0, 3),  # Offset for text
+                xytext=(0, 3),
                 textcoords="offset points",
                 ha="center",
                 va="bottom",
-                fontsize=10,
+                fontsize=10
             )
-
-    plt.tight_layout()
-    plt.show()
+            
