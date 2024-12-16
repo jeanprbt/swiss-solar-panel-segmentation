@@ -3,6 +3,7 @@ import torch.nn as nn
 
 from tqdm import tqdm
 from torch.utils.data import DataLoader
+from codecarbon import EmissionsTracker
 
 
 def train_unet(
@@ -16,7 +17,8 @@ def train_unet(
     device: torch.device = torch.device("cpu"),
 ) -> list[float] | list[float]:
     """
-    Train U-Net with early stopping, computing training and validation losses.
+    Train U-Net with early stopping, computing training and validation losses. Also compute
+    the carbon emissions during training.
 
     Args:
         model (torch.nn.Module): U-Net model to be trained.
@@ -32,6 +34,9 @@ def train_unet(
         train_losses (list): List of training losses per epoch.
         val_losses (list): List of validation losses per epoch.
     """
+    tracker = EmissionsTracker(log_level="critical", save_to_file=False)
+    tracker.start()
+    
     model = model.to(device)
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
 
@@ -85,5 +90,6 @@ def train_unet(
             print("Early stopping triggered!")
             break
 
-    print("Training complete.")
+    emissions = tracker.stop()
+    print(f"Training complete, emitted {emissions} kgCO2")
     return train_losses, val_losses

@@ -2,8 +2,9 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 
-from torch.utils.data import DataLoader
 from tqdm import tqdm
+from torch.utils.data import DataLoader
+from codecarbon import EmissionsTracker
 
 from models.deeplab.utils import IoU
 
@@ -33,6 +34,9 @@ def train_deeplab(
         list[float]: training losses
         list[float]: training IoUs
     """
+    tracker = EmissionsTracker(log_level="critical", save_to_file=False)
+    tracker.start()
+    
     model = model.to(device)
     optimizer = optim.Adam(model.parameters(), lr=lr)
     
@@ -88,5 +92,6 @@ def train_deeplab(
         print(f"Got {num_correct}/{num_pixels} with acc {num_correct / num_pixels * 100:.2f}%")
         print(f"Dice score: {dice_score / len(val_loader):.4f}")
 
-    print("Training complete.")
+    emissions = tracker.stop()
+    print(f"Training complete, emitted {emissions} kgCO2")
     return train_loss, train_iou
