@@ -1,6 +1,6 @@
 # Solar Panel Segmentation from Swisstopo Aerial Images ☀️
 >
-> CS-433 Machine Learning - Project 2
+> CS-433 Machine Learning - Project n°2
 >
 > Mehdi Zoghlami, Maxime Ducourau, Jean Perbet
 
@@ -16,18 +16,22 @@ The repository is structured as follows:
 ├── data/                           
 │   ├── images/              # Images
 │   ├── labels/              # Ground truth labels
-│   │   └── labels.json  
 │   ├── roofs/                        
 │   │   ├── coordinates/     # Coordinates of all swiss roofs
 │   │   ├── images/          # Images w/ filtered out roofs
 │   │   └── masks/           # Binary masks of roofs corresponding to images
-│   ├── tiles/               # Original tiles
-│   └── urls/                # Swisstopo URLs
-│       └── urls.csv
+│   ├── tiles/               # Original tiles             
+│   ├── urls/                # Swisstopo URLs  
+│   └── weights/             # Pre-trained weights for models
 ├── notebooks/
-│   └── preprocessing.ipynb  # Notebook for data retrieval & preprocessing
+│   ├── preprocessing.ipynb  # Notebook for data retrieval & preprocessing
+│   └── results.ipynb        # Main notebook w/ results
 ├── src/
+│   ├── models/              # Model-specific classes/functions    
+│   ├── dataset.py           # Data loading classes/functions
+│   ├── model_functions.py   # Generic model functions
 │   ├── plotting.py          # Plotting functions
+│   ├── postprocessing.py    # Postprocessing functions
 │   └── preprocessing.py     # Preprocessing functions
 └── README.md
 ```
@@ -43,3 +47,5 @@ The repository is structured as follows:
 2. Data should be collected and put in the corresponding directories. There are two ways to do this.
     - Run the `preprocessing.ipynb` notebook in the `notebooks/` directory (~500 data points)
     - Directly download the data from this [kaggle dataset](https://www.kaggle.com/datasets/jeanperbet/ml-project-2-solar-panels/data?select=roof_images) (~750 data points)
+
+3. Run the main notebook `results.ipynb` with training & results parts.
