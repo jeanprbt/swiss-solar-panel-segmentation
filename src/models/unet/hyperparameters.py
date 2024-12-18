@@ -1,5 +1,5 @@
 import optuna
-optuna.logging.set_verbosity(optuna.logging.WARNING)
+optuna.logging.set_verbosity(optuna.logging.INFO)
 
 import torch.nn as nn
 import torch.optim as optim

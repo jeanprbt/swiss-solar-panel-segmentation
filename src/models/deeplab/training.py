@@ -1,6 +1,5 @@
 import torch
 import torch.nn as nn
-import torch.optim as optim
 
 from tqdm import tqdm
 from torch.utils.data import DataLoader
@@ -15,6 +14,7 @@ def train_deeplab(
     val_loader: DataLoader,
     lr: float,
     epochs: int,
+    patience: int,
     device: torch.device,
 ) -> tuple[list[float], list[float]]:
     """
@@ -25,8 +25,9 @@ def train_deeplab(
         train_loader (DataLoader): DataLoader for the training set.
         val_loader (DataLoader): DataLoader for the validation set.
         lr (float): Learning rate for the optimizer.
+        epochs (int): Number of epochs to train for.
+        patience (int): Number of epochs to wait for improvement before early stopping.
         device (torch.device): The device to run the training on.
-        pochs (int): Number of epochs to train for.
         
     Returns:
         list[float]: training losses
@@ -43,8 +44,12 @@ def train_deeplab(
     
     train_iou = []
     train_loss = []
+    
+    best_dice = 0
+    patience_cnt = 0
 
     for epoch in range(epochs):
+        model.train()
         print(f"Epoch: {epoch+1}/{epochs}")
 
         iterations = 0
@@ -82,14 +87,10 @@ def train_deeplab(
         dice_score = 0
         model.eval()
 
-        all_data = []
-        all_targets = []
-        all_preds = []
-
         with torch.no_grad():
             for x, y in tqdm(val_loader, desc="Validation"):
                 x = x.to(device)
-                y = y.to(device).unsqueeze(1)
+                y = y.float().unsqueeze(1).to(device)
                 preds = torch.sigmoid(model(x))
                 preds = (preds > 0.5).float()
                 num_correct += (preds == y).sum()
@@ -97,19 +98,20 @@ def train_deeplab(
                 dice_score += (2 * (preds * y).sum()) / (
                     (preds + y).sum() + 1e-8
                 )
-                all_data.append(x)
-                all_targets.append(y)
-                all_preds.append(preds)
+        
+        dice = dice_score / len(val_loader)
+        print(f"Dice score: {dice}")
+        
+        if dice > best_dice:
+            best_dice = dice
+            patience_cnt = 0
+        else:
+            patience_cnt += 1
 
-        print(
-            f"Got {num_correct}/{num_pixels} with acc {num_correct/num_pixels*100:.2f}"
-        )
-        print(f"Dice score: {dice_score/len(val_loader)}")
+        if patience_cnt > patience:
+            print("Early stopping triggered")
+            break
 
-        all_data = torch.cat(all_data, dim=0)
-        all_targets = torch.cat(all_targets, dim=0)
-        all_preds = torch.cat(all_preds, dim=0)
-
-        emissions = tracker.stop()
-        print(f"Training complete, emitted {emissions} kgCO2")
-        return train_loss, train_iou
+    emissions = tracker.stop()
+    print(f"Training complete, emitted {emissions} kgCO2")
+    return train_loss, train_iou

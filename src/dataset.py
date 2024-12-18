@@ -30,7 +30,6 @@ class SegmentationDataset(Dataset):
             augmented = self.transform(image=image, mask=label)
             image = augmented["image"]
             label = augmented["mask"].unsqueeze(0)
-            return image, label, image_name
 
         return image, label, image_name
     
