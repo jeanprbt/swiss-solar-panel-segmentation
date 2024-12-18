@@ -28,6 +28,7 @@ The repository is structured as follows:
 ├── notebooks/
 │   ├── preprocessing.ipynb  # Notebook for data retrieval & preprocessing
 │   └── results.ipynb        # Main notebook w/ results
+├── report.pdf               # Associated paper
 ├── src/
 │   ├── models/              # Model-specific classes/functions    
 │   ├── dataset.py           # Data loading classes/functions
