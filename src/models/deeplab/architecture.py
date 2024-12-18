@@ -6,58 +6,48 @@ import torchvision.models as models
 
 class Deeplabv3Plus(nn.Module):
     """
-    DeepLabV3+ model with a ResNet-50 backbone.
+    Deeplabv3+ model architecture.
     """
     def __init__(self, num_classes):
-        super().__init__()
+        """
+        Deeplabv3+ model architecture contructor.
+        """
+        super(Deeplabv3Plus, self).__init__()
         self.backbone = ResNet_50(output_layer='layer3')
         self.low_level_features = ResNet_50(output_layer='layer1')
-        self.assp = ASSP(in_channels=1024, out_channels=256)
+        self.assp = ASSP(in_channles=1024, out_channles=256)
         self.conv1x1 = Atrous_Convolution(
-            input_channels=256, 
-            output_channels=48,
-            kernel_size=1,
-            dilation_rate=1,
-            pad=0
-        )
+            input_channels=256, output_channels=48, kernel_size=1,
+            dilation_rate=1, pad=0)
         self.conv_3x3 = nn.Sequential(
             nn.Conv2d(304, 256, 3, padding=1, bias=False),
             nn.BatchNorm2d(256),
             nn.ReLU(inplace=True)
         )
-        self.classifer = nn.Conv2d(256, num_classes, 1)
 
+        self.classifer = nn.Conv2d(256, num_classes, 1)
+        
     def forward(self, x):
         x_backbone = self.backbone(x)
         x_low_level = self.low_level_features(x)
         x_assp = self.assp(x_backbone)
         x_assp_upsampled = F.interpolate(
-            x_assp, 
-            scale_factor=(4, 4),
-            mode='bilinear', 
-            align_corners=True
-        )
+            x_assp, scale_factor=(4, 4),
+            mode='bilinear', align_corners=True)
         x_conv1x1 = self.conv1x1(x_low_level)
-        x_assp_upsampled = F.interpolate(
-            x_assp_upsampled, 
-            size=(250, 250), 
-            mode='bilinear', 
-            align_corners=True
-        )
+        x_assp_upsampled = F.interpolate(x_assp_upsampled, size=(250, 250), mode='bilinear', align_corners=True)
         x_cat = torch.cat([x_conv1x1, x_assp_upsampled], dim=1)
         x_3x3 = self.conv_3x3(x_cat)
         x_3x3_upscaled = F.interpolate(
-            x_3x3, 
-            scale_factor=(4, 4),
-            mode='bilinear', 
-            align_corners=True
-        )
-        return self.classifer(x_3x3_upscaled)
+            x_3x3, scale_factor=(4, 4),
+            mode='bilinear', align_corners=True)
+        x_out = self.classifer(x_3x3_upscaled)
+        return x_out
     
     
 class ResNet_50(nn.Module):
     """
-    ResNet-50 model with pretrained weights.
+    ResNet-50 backbone model.
     """
     def __init__(self, output_layer=None):
         super(ResNet_50, self).__init__()
@@ -72,7 +62,7 @@ class ResNet_50(nn.Module):
                 break
         for i in range(1, len(self.layers)-self.layer_count):
             self.dummy_var = self.pretrained._modules.pop(self.layers[-i])
-        self.net = nn.Sequential(*self.pretrained._modules.values())
+        self.net = nn.Sequential(self.pretrained._modules)
         self.pretrained = None
 
     def forward(self, x):
@@ -82,21 +72,22 @@ class ResNet_50(nn.Module):
 
 class Atrous_Convolution(nn.Module):
     """Compute Atrous/Dilated Convolution."""
-
     def __init__(
             self, input_channels, kernel_size, pad, dilation_rate,
             output_channels=256):
-        super().__init__()
-        self.conv = nn.Conv2d(
-            in_channels=input_channels,
-            out_channels=output_channels,
-            kernel_size=kernel_size, padding=pad,
-            dilation=dilation_rate, bias=False
-        )
+        super(Atrous_Convolution, self).__init__()
+
+        self.conv = nn.Conv2d(in_channels=input_channels,
+                              out_channels=output_channels,
+                              kernel_size=kernel_size, padding=pad,
+                              dilation=dilation_rate, bias=False)
+
         self.batchnorm = nn.BatchNorm2d(output_channels)
+
         self.relu = nn.ReLU(inplace=True)
 
     def forward(self, x):
+
         x = self.conv(x)
         x = self.batchnorm(x)
         x = self.relu(x)
@@ -106,62 +97,42 @@ class Atrous_Convolution(nn.Module):
 class ASSP(nn.Module):
     """Atrous Spatial Pyramid pooling layer."""
 
-    def __init__(self, in_channels, out_channels):
-        """Atrous Spatial Pyramid pooling layer
-        Args:
-            in_channels (int): nb. of input channel for Atrous_Convolution.
-            out_channels (int): nb. of output channel for Atrous_Convolution.
+    def __init__(self, in_channles, out_channles):
         """
-        super().__init__()
+        Atrous Spatial Pyramid pooling layer.
+        
+        Args:
+            in_channles (int): Nb. of input channel for Atrous_Convolution.
+            out_channles (int): Nb. of output channel for Atrous_Convolution.
+        """
+        super(ASSP, self).__init__()
         self.conv_1x1 = Atrous_Convolution(
-            input_channels=in_channels,
-            output_channels=out_channels,
-            kernel_size=1, 
-            pad=0, 
-            dilation_rate=1
-        )
+            input_channels=in_channles, output_channels=out_channles,
+            kernel_size=1, pad=0, dilation_rate=1)
+
         self.conv_6x6 = Atrous_Convolution(
-            input_channels=in_channels,
-            output_channels=out_channels,
-            kernel_size=3,
-            pad=6, 
-            dilation_rate=6
-        )
+            input_channels=in_channles, output_channels=out_channles,
+            kernel_size=3, pad=6, dilation_rate=6)
+
         self.conv_12x12 = Atrous_Convolution(
-            input_channels=in_channels,
-            output_channels=out_channels,
-            kernel_size=3,
-            pad=12, 
-            dilation_rate=12
-        )
+            input_channels=in_channles, output_channels=out_channles,
+            kernel_size=3, pad=12, dilation_rate=12)
+
         self.conv_18x18 = Atrous_Convolution(
-            input_channels=in_channels, 
-            output_channels=out_channels,
-            kernel_size=3,
-            pad=18,
-            dilation_rate=18
-        )
+            input_channels=in_channles, output_channels=out_channles,
+            kernel_size=3, pad=18, dilation_rate=18)
+        
         self.image_pool = nn.Sequential(
             nn.AdaptiveAvgPool2d(1),
             nn.Conv2d(
-                in_channels=in_channels, 
-                out_channels=out_channels,
-                kernel_size=1, 
-                stride=1, 
-                padding=0, 
-                dilation=1,
-                bias=False
-            ),
+                in_channels=in_channles, out_channels=out_channles,
+                kernel_size=1, stride=1, padding=0, dilation=1, bias=False),
             nn.BatchNorm2d(256),
-            nn.ReLU(inplace=True)
-        )
+            nn.ReLU(inplace=True))
+
         self.final_conv = Atrous_Convolution(
-            input_channels=out_channels * 5,
-            output_channels=out_channels,
-            kernel_size=1, 
-            pad=0, 
-            dilation_rate=1
-        )
+            input_channels=out_channles * 5, output_channels=out_channles,
+            kernel_size=1, pad=0, dilation_rate=1)
 
     def forward(self, x):
         x_1x1 = self.conv_1x1(x)
@@ -170,10 +141,10 @@ class ASSP(nn.Module):
         x_18x18 = self.conv_18x18(x)
         img_pool_opt = self.image_pool(x)
         img_pool_opt = F.interpolate(
-            img_pool_opt, 
-            size=x_18x18.size()[2:],
-            mode='bilinear',
-            align_corners=True
-        )
-        concat = torch.cat((x_1x1, x_6x6, x_12x12, x_18x18, img_pool_opt), dim=1)
-        return self.final_conv(concat)
+            img_pool_opt, size=x_18x18.size()[2:],
+            mode='bilinear', align_corners=True)
+        concat = torch.cat(
+            (x_1x1, x_6x6, x_12x12, x_18x18, img_pool_opt),
+            dim=1)
+        x_final_conv = self.final_conv(concat)
+        return x_final_conv

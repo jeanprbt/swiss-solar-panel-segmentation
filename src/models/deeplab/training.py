@@ -6,14 +6,13 @@ from tqdm import tqdm
 from torch.utils.data import DataLoader
 from codecarbon import EmissionsTracker
 
-from models.deeplab.utils import IoU
+from models.deeplab.utils import IOU, DiceBCELoss
 
 
 def train_deeplab(
     model: nn.Module,
     train_loader: DataLoader,
     val_loader: DataLoader,
-    criterion: nn.Module,
     lr: float,
     epochs: int,
     device: torch.device,
@@ -25,7 +24,6 @@ def train_deeplab(
         model (torch.nn.Module): DeepLab model to be trained.
         train_loader (DataLoader): DataLoader for the training set.
         val_loader (DataLoader): DataLoader for the validation set.
-        criterion (torch.nn.Module): Loss function to use.
         lr (float): Learning rate for the optimizer.
         device (torch.device): The device to run the training on.
         pochs (int): Number of epochs to train for.
@@ -38,60 +36,80 @@ def train_deeplab(
     tracker.start()
     
     model = model.to(device)
-    optimizer = optim.Adam(model.parameters(), lr=lr)
-    
-    iou_fn = IoU()
+    loss_fn = DiceBCELoss()
+    iou_fn = IOU()
+    optimizer = torch.optim.Adam(model.parameters(), lr=lr)
     scaler = torch.amp.GradScaler(str(device))
     
     train_iou = []
     train_loss = []
+
     for epoch in range(epochs):
-        model.train()
-        
+        print(f"Epoch: {epoch+1}/{epochs}")
+
         iterations = 0
         iter_loss = 0.0
         iter_iou = 0.0
-        
-        # Training loop
-        batch_loop = tqdm(train_loader, desc=f"Training Epoch {epoch + 1}")
-        for image, mask, _ in batch_loop:
-            image, mask = image.to(device), mask.to(device)
-            with torch.amp.autocast(device_type=str(device)):
-                predictions = model(image)
-                loss = criterion(predictions, mask)
-                iou = iou_fn(predictions, mask)
+
+        batch_loop = tqdm(train_loader, desc=f"Training Epoch: {epoch+1}/{epochs}")
+        for _, (data, targets, _) in enumerate(batch_loop):
+
+            data = data.to(device=device)
+            targets = targets.float().unsqueeze(1).to(device=device)
+
+            with torch.cuda.amp.autocast():
+                predictions = model(data)
+                loss = loss_fn(predictions , targets)
+                iou = iou_fn(predictions , targets)
                 iter_loss += loss.item()
                 iter_iou += iou.item()
+
             optimizer.zero_grad()
             scaler.scale(loss).backward()
             scaler.step(optimizer)
             scaler.update()
-            iterations += 1
-            batch_loop.set_postfix(diceloss=loss.item(), iou=iou.item())
+
+            iterations += 1 
+            batch_loop.set_postfix(diceloss = loss.item(), iou = iou.item())
+
 
         train_loss.append(iter_loss / iterations)
-        train_iou.append(iter_iou / iterations)
+        train_iou.append(iter_iou/iterations)
+        print(f"Training loss: {round(train_loss[-1] , 3)}")
 
-        print(f"Epoch: {epoch + 1}/{epochs}, Training loss: {round(train_loss[-1], 3)}")
-
-        # Validation loop
         num_correct = 0
         num_pixels = 0
-        dice_score = 0.0
+        dice_score = 0
         model.eval()
 
+        all_data = []
+        all_targets = []
+        all_preds = []
+
         with torch.no_grad():
-            for image, mask, _ in tqdm(val_loader, desc=f"Validation Epoch {epoch+1}"):
-                x, y = image.float().to(device), mask.float().to(device)
+            for x, y in tqdm(val_loader, desc="Validation"):
+                x = x.to(device)
+                y = y.to(device).unsqueeze(1)
                 preds = torch.sigmoid(model(x))
                 preds = (preds > 0.5).float()
-                num_correct += (preds == y).sum().item()
+                num_correct += (preds == y).sum()
                 num_pixels += torch.numel(preds)
-                dice_score += (2 * (preds * y).sum()) / ((preds + y).sum() + 1e-8)
+                dice_score += (2 * (preds * y).sum()) / (
+                    (preds + y).sum() + 1e-8
+                )
+                all_data.append(x)
+                all_targets.append(y)
+                all_preds.append(preds)
 
-        print(f"Got {num_correct}/{num_pixels} with acc {num_correct / num_pixels * 100:.2f}%")
-        print(f"Dice score: {dice_score / len(val_loader):.4f}")
+        print(
+            f"Got {num_correct}/{num_pixels} with acc {num_correct/num_pixels*100:.2f}"
+        )
+        print(f"Dice score: {dice_score/len(val_loader)}")
 
-    emissions = tracker.stop()
-    print(f"Training complete, emitted {emissions} kgCO2")
-    return train_loss, train_iou
+        all_data = torch.cat(all_data, dim=0)
+        all_targets = torch.cat(all_targets, dim=0)
+        all_preds = torch.cat(all_preds, dim=0)
+
+        emissions = tracker.stop()
+        print(f"Training complete, emitted {emissions} kgCO2")
+        return train_loss, train_iou
