@@ -51,6 +51,6 @@ The repository is structured as follows:
     - Run the `preprocessing.ipynb` notebook in the `notebooks/` directory (~500 data points)
     - Directly download the data from this [kaggle dataset](https://www.kaggle.com/datasets/jeanperbet/ml-project-2-solar-panels/data?select=roof_images) (~750 data points)
 
-3. Decide whether you want to train models on your own or use them pre-trained with the weights we provide. In the latter case, you should download the weights from the same [kaggle dataset] as for the previous step.
+3. Decide whether you want to train models on your own or use them pre-trained with the weights we provide. In the latter case, you should download the weights from the same [kaggle dataset](https://www.kaggle.com/datasets/jeanperbet/ml-project-2-solar-panels/data?select=roof_images) as for the previous step.
 
 4. Run the main notebook `results.ipynb` with training & results parts.
