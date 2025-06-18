@@ -37,13 +37,9 @@ def plot_prediction(
     Visualize the output of a segmentation model.
 
     Args:
-        model (nn.Module): trained model
-        test_loader (DataLoader): test data loader
-        idx (int): index of the image to visualize
-        threshold (float): threshold for binary predictions
-        post_process (bool): whether to apply post-processing to the predicted mask
-        roof_masks_dir (str): directory containing roof masks
-        device (torch.device): device to perform computations on
+        real_image (Image): The original image.
+        ground_truth (np.ndarray): The ground truth mask as a 2D numpy array.
+        predicted_mask (np.ndarray): The predicted segmentation mask as a 2D numpy array.
     """
     _, axes = plt.subplots(1, 3, figsize=(15, 5))
     axes[0].imshow(real_image)
@@ -61,7 +57,7 @@ def plot_prediction(
 
 def plot_losses(train_losses: list[float], val_losses: list[float]):
     """
-    plots the training and validation losses over epochs.
+    Plot the training and validation losses over epochs.
 
     Args:
         train_losses (list): List of training losses per epoch.
